@@ -147,7 +147,7 @@
 (deftoken transform-prefix #"\.")
 (deftoken stream-prefix #"&")
 (deftoken pattern #"[a-zA-Z0-9:_\-\*]*")
-(deftoken id #"[_a-zA-Z][a-zA-Z0-9\-_]*")
+(deftoken id #"[_a-zA-Z][a-zA-Z0-9\-_?]*")
 (def comparison (fn [s] ((token *comparison*) s)))
 (deftoken number #"[0-9\.]+" read-string)
 (deftoken string #"'[^']*'|\"[^\"]*\"" #(.substring ^String % 1 (dec (count %))))
