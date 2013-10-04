@@ -150,6 +150,8 @@
 (deftoken id #"[_a-zA-Z][a-zA-Z0-9\-_?]*")
 (def comparison (fn [s] ((token *comparison*) s)))
 (deftoken number #"[0-9\.]+" read-string)
+(deftoken bool #"true|false" {"true" true, "false" false})
+(deftoken null #"null" (constantly nil))
 (deftoken string #"'[^']*'|\"[^\"]*\"" #(.substring ^String % 1 (dec (count %))))
 (deftoken whitespace #"[\s,]*")
 (deftoken empty-token #"")
@@ -184,13 +186,17 @@
   (defn tuple [s]
     (@t s)))
 
+(def value
+  (token
+    (one-of number string bool null)))
+
 (def value-set
   (token
     (chain
       (ignore whitespace)
       (ignore #"\[")
-      (chain (one-of number string)
-        (many (second* whitespace (one-of number string))))
+      (chain value
+        (many (second* whitespace value)))
       (ignore whitespace)
       (expect #"\]"))
     (fn [[[a b]]]
@@ -204,13 +210,13 @@
               (ignore whitespace)
               comparison
               (ignore whitespace)
-              (one-of number string value-set))
+              (one-of value value-set))
             (fn [[a b c]]
               (list b a c))))]
   (defn relationship [s]
     (@t s)))
 
-(let [t (delay (one-of tuple string number-array pair relationship operators time-interval number stream))]
+(let [t (delay (one-of tuple number-array pair relationship operators time-interval value stream))]
   (defn param [s]
     (@t s)))
 
